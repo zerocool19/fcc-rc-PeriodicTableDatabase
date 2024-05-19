@@ -19,32 +19,40 @@ else
     MELTING_POINT_CELSIUS=$($PSQL "SELECT melting_point_celsius FROM properties WHERE atomic_number = $ATOMIC_NUMBER")
     BOILING_POINT_CELSIUS=$($PSQL "SELECT boiling_point_celsius FROM properties WHERE atomic_number = $ATOMIC_NUMBER")
     TYPE=$($PSQL "SELECT type FROM properties JOIN types USING(type_id) WHERE atomic_number = $ATOMIC_NUMBER")
+  else
+    
+    # Check if the input is passing symbol name as argument
+    if [[ $1 =~ ^[a-zA-Z]{1,2}$ ]]
+    then
+      ATOMIC_NUMBER=$($PSQL "SELECT atomic_number FROM elements WHERE symbol = '$1'")
+      NAME=$($PSQL "SELECT name FROM elements WHERE symbol = '$1'")
+      SYMBOL=$1
+      ATOMIC_MASS=$($PSQL "SELECT atomic_mass FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
+      MELTING_POINT_CELSIUS=$($PSQL "SELECT melting_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
+      BOILING_POINT_CELSIUS=$($PSQL "SELECT boiling_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
+      TYPE=$($PSQL "SELECT type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE symbol = '$1'")
+    else
+      
+      # Check if the input is passing element full name as argument
+      if [[ $1 =~ ^[a-zA-Z]{3,}$ ]]
+      then
+        ATOMIC_NUMBER=$($PSQL "SELECT atomic_number FROM elements WHERE name = '$1'")
+        NAME=$1
+        SYMBOL=$($PSQL "SELECT symbol FROM elements WHERE name = '$1'")
+        ATOMIC_MASS=$($PSQL "SELECT atomic_mass FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
+        MELTING_POINT_CELSIUS=$($PSQL "SELECT melting_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
+        BOILING_POINT_CELSIUS=$($PSQL "SELECT boiling_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
+        TYPE=$($PSQL "SELECT type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE name = '$1'")
+      fi
+    fi
   fi
 
-  # Check if the input is passing symbol name as argument
-  if [[ $1 =~ ^[a-zA-Z]{1,2}$ ]]
+  # Checking if the element exist in the database
+  if [[ -z $TYPE ]]
   then
-    ATOMIC_NUMBER=$($PSQL "SELECT atomic_number FROM elements WHERE symbol = '$1'")
-    NAME=$($PSQL "SELECT name FROM elements WHERE symbol = '$1'")
-    SYMBOL=$1
-    ATOMIC_MASS=$($PSQL "SELECT atomic_mass FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
-    MELTING_POINT_CELSIUS=$($PSQL "SELECT melting_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
-    BOILING_POINT_CELSIUS=$($PSQL "SELECT boiling_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE symbol = '$1'")
-    TYPE=$($PSQL "SELECT type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE symbol = '$1'")
+    echo -e "\nI could not find that element in the database."
+  else
+    # Print the output
+    echo -e "\nThe element with atomic number $ATOMIC_NUMBER is $NAME ($SYMBOL). It's a $TYPE, with a mass of $ATOMIC_MASS amu. $SYMBOL has a melting point of $MELTING_POINT_CELSIUS celsius and a boiling point of $BOILING_POINT_CELSIUS celsius.\n"
   fi
-
-  # Check if the input is passing element full name as argument
-  if [[ $1 =~ ^[a-zA-Z]{3,}$ ]]
-  then
-    ATOMIC_NUMBER=$($PSQL "SELECT atomic_number FROM elements WHERE name = '$1'")
-    NAME=$1
-    SYMBOL=$($PSQL "SELECT symbol FROM elements WHERE name = '$1'")
-    ATOMIC_MASS=$($PSQL "SELECT atomic_mass FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
-    MELTING_POINT_CELSIUS=$($PSQL "SELECT melting_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
-    BOILING_POINT_CELSIUS=$($PSQL "SELECT boiling_point_celsius FROM elements JOIN properties USING(atomic_number) WHERE name = '$1'")
-    TYPE=$($PSQL "SELECT type FROM elements JOIN properties USING(atomic_number) JOIN types USING(type_id) WHERE name = '$1'")
-  fi
-
-  # Print the output
-  echo -e "\nThe element with atomic number $ATOMIC_NUMBER is $NAME ($SYMBOL). It's a $TYPE, with a mass of $ATOMIC_MASS amu. $SYMBOL has a melting point of $MELTING_POINT_CELSIUS celsius and a boiling point of $BOILING_POINT_CELSIUS celsius."
 fi
