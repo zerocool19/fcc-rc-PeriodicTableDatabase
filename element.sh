@@ -50,9 +50,9 @@ else
   # Checking if the element exist in the database
   if [[ -z $TYPE ]]
   then
-    echo -e "\nI could not find that element in the database."
+    echo "I could not find that element in the database."
   else
     # Print the output
-    echo -e "\nThe element with atomic number $ATOMIC_NUMBER is $NAME ($SYMBOL). It's a $TYPE, with a mass of $ATOMIC_MASS amu. $SYMBOL has a melting point of $MELTING_POINT_CELSIUS celsius and a boiling point of $BOILING_POINT_CELSIUS celsius.\n"
+    echo "The element with atomic number $ATOMIC_NUMBER is $NAME ($SYMBOL). It's a $TYPE, with a mass of $ATOMIC_MASS amu. $NAME has a melting point of $MELTING_POINT_CELSIUS celsius and a boiling point of $BOILING_POINT_CELSIUS celsius."
   fi
 fi
